@@ -46,13 +46,13 @@ class NoteLounge {
     return singleNote;
   }
 }
-class NotePasse extends NoteLounge{
+class NotePasse {
   constructor(container){
-    super()
+    
     this.container= document.querySelector(container);
-    this.noteElems=container.querySelectorAll('.notes');
+    this.noteElems=this.container.querySelectorAll('.note');
     this.noteElems.forEach((noteElem)=>{
-      noteElem.addEventListeners('click',(evt)=>{
+      noteElem.addEventListener('click',(evt)=>{
         this.clickNote(evt)
       })
     })
@@ -60,8 +60,21 @@ class NotePasse extends NoteLounge{
   }
   clickNote(evt){
 const clickedNote=evt.currentTarget;
-console.log(clickedNote);
+const allNotes=NoteLounge.getAllNotes();
+const noteId = clickedNote.dataset.noteId
+const Note=NoteLounge.editNote(noteId)
+console.log(Note);
+newNoteTitle.value=Note.title
+newNoteBody.value=Note.body
 }
+refreshNotes(){
+  NoteLounge.getAllNotes();
+}
+}
+newNoteBody.addEventListener('blur',()=>SaveANote);
+function SaveANote(note){
+  NoteLounge.saveNote(note);
+  console.log('ok');
 }
 
 
@@ -111,7 +124,7 @@ function renderNotesToView() {
   if (notes.length) {
     notes.map((note) => {
       html += `
-          <div class="note">
+          <div class="note" data-note-id='${note.id}'>
           <h2 class="note__title">${note.title}</h2>
           <div class="note__body">
           ${note.body}
@@ -138,3 +151,4 @@ function renderNotesToView() {
   }
 }
 renderNotesToView();
+new  NotePasse('.notes-container')
