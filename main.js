@@ -4,14 +4,8 @@ const newNoteBody = document.querySelector("#new_note_body");
 const notesContainer = document.querySelector(".notes-container");
 
 function generateID() {
-  const chars = "abcdefghijklmnopqrstuvwxyz1234567890";
-  let randomID = '';
-  for (let i = 0; i < chars.length; i++) {
-    if (i > 20) {
-      break;
-    }
-    randomID += chars[Math.floor(Math.random() * chars.length)]
-  }
+  
+  let randomID = Math.random().toString(16).substring(2);
   return (
     randomID
   )
@@ -38,7 +32,7 @@ class NoteLounge {
 
   }
   static getAllNotes() {
-    const allNotes = JSON.parse(localStorage.getItem('note-lounge')) || [];
+    const allNotes = JSON.parse(localStorage.getItem('note-lounge')) || '[]';
     return allNotes.sort((a, b) => b.pubdate - a.pubdate);
   }
   static deleteNote(id) {
@@ -52,13 +46,31 @@ class NoteLounge {
     return singleNote;
   }
 }
+class NotePasse extends NoteLounge{
+  constructor(container){
+    super()
+    this.container= document.querySelector(container);
+    this.noteElems=container.querySelectorAll('.notes');
+    this.noteElems.forEach((noteElem)=>{
+      noteElem.addEventListeners('click',(evt)=>{
+        this.clickNote(evt)
+      })
+    })
+    
+  }
+  clickNote(evt){
+const clickedNote=evt.currentTarget;
+console.log(clickedNote);
+}
+}
+
 
 function addNote() {
   let n = NoteLounge.getAllNotes();
   let l = NoteLounge.saveNote({
     title: 'sixth post ',
     body: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium cupiditate minima, libero commodi consectetur, voluptas voluptatum reiciendis maiores sint architecto repella ',
-    category: 'test cat 6'
+    category: 'test cat 7'
   })
   console.log(n);
 }
@@ -109,7 +121,7 @@ function renderNotesToView() {
             category: <span>${note.category}</span>
             </span>
             <span class="note__pubdate">
-            ${TF(note.pubdate).weekDay} ${TF(note.pubdate).day} ${TF(note.pubdate).month} ${TF(note.pubdate).year}, ${TF(note.pubdate).hrs}:${TF(note.pubdate).mins} ${TF(note.pubdate).am_pm}</span>
+            ${new Date(note.pubdate).toLocaleString(undefined,{dateStyle:'long',timeStyle:'medium'})}</span>
           </div>
 </div>
   `
