@@ -1,7 +1,7 @@
 const newNoteTitle = document.querySelector("#new_note_title");
-const newNoteCategory = document.querySelector("#new_note_category");
+// const newNoteCategory = document.querySelector("#new_note_category");
 const newNoteBody = document.querySelector("#new_note_body");
-const notesContainer = document.querySelector(".notes-container");
+// const notesContainer = document.querySelector(".notes-container");
 
 function generateID() {
   
@@ -32,8 +32,11 @@ class NoteLounge {
 
   }
   static getAllNotes() {
-    const allNotes = JSON.parse(localStorage.getItem('note-lounge')) || '[]';
+    const allNotes = JSON.parse(localStorage.getItem('note-lounge') || '[]');
+    if(allNotes.length){
+      
     return allNotes.sort((a, b) => b.pubdate - a.pubdate);
+    }
   }
   static deleteNote(id) {
     const Notes = NoteLounge.getAllNotes();
@@ -50,39 +53,111 @@ class NotePasse {
   constructor(container){
     
     this.container= document.querySelector(container);
-    this.noteElems=this.container.querySelectorAll('.note');
-    this.noteElems.forEach((noteElem)=>{
-      noteElem.addEventListener('click',(evt)=>{
-        this.clickNote(evt)
-      })
-    })
+    this.newNoteTitle = document.querySelector("#new_note_title");
+    // this.newNoteCategory = document.querySelector("#new_note_category");
+    this.newNoteBody = document.querySelector("#new_note_body");
+    this.noteToEdit=null;
+    this.noteId=null;
+    this.renderNotesToView();
     
+  this.newNoteBody.addEventListener('blur',()=>{this.saveANote(this.noteToEdit)});  
+  [this.newNoteBody,this.newNoteTitle].forEach((newNoteVal)=>{
+  newNoteVal.addEventListener('keyup',()=>{
+    this.resaveNote()
+  });
+  })
   }
   clickNote(evt){
 const clickedNote=evt.currentTarget;
 const allNotes=NoteLounge.getAllNotes();
-const noteId = clickedNote.dataset.noteId
-const Note=NoteLounge.editNote(noteId)
-console.log(Note);
-newNoteTitle.value=Note.title
-newNoteBody.value=Note.body
+this.noteId = clickedNote.dataset.noteId
+const Note=NoteLounge.editNote(this.noteId)
+
+this.newNoteTitle.value=Note.title || '';
+this.newNoteBody.value=Note.body || '';
+// this.newNoteCategory.value=Note.category || ''
+
+}
+resaveNote(){
+  const U=this.Utils();
+  const body=U.isEmptyString(this.newNoteBody.value) ? '' : this.newNoteBody.value;
+  const title=U.isEmptyString(this.newNoteTitle.value) ? '' : this.newNoteTitle.value;
+  // const category=U.isEmptyString(this.newNoteCategory.value) ? '' : this.newNoteCategory.value;
+  
+  this.noteToEdit = {
+    body,
+    title,
+    id: this.noteId
+  }
 }
 refreshNotes(){
   NoteLounge.getAllNotes();
 }
-}
-newNoteBody.addEventListener('blur',()=>SaveANote);
-function SaveANote(note){
+saveANote(note){
   NoteLounge.saveNote(note);
-  console.log('ok');
+  this.renderNotesToView()
+  
+}
+Utils(){
+  return {
+    isUndefined(val){
+      return (Object.prototype.toString.call(val) === 'object Undefined');
+    },
+    isEmptyString(val){
+      return (val.trim() === '');
+    }
+  }
+}
+renderNotesToView() {
+const MAX_BODY_LENGTH=70;
+  const notes = NoteLounge.getAllNotes()
+  let html = '';
+  if (notes.length) {
+    notes.map((note) => {
+      html += `
+          <div class="note" data-note-id='${note.id}'>
+          <h2 class="note__title">${note.title}</h2>
+          <div class="note__body">
+          ${note.body.substring(0,MAX_BODY_LENGTH)}
+          ${note.body.length > MAX_BODY_LENGTH ? '...' : ''}
+          </div>
+          <div class="note__category-pubdate">
+            <span class="note__category">
+            ${note.category ? `category: <span>${note.category}</span>`
+           : '' }
+            </span>
+            <span class="note__pubdate">
+            ${new Date(note.pubdate).toLocaleString(undefined,{dateStyle:'long',timeStyle:'medium'})}</span>
+          </div>
+</div>
+  `
+
+    });
+    this.container.innerHTML='';
+    this.container.insertAdjacentHTML('beforeend',html);
+  }
+  else {
+    this.container.innerHTML = `
+    <div class="no-notes-yet-container">
+      'no notes yet'
+      <button type="button" class="create-note-btn"> create a note </button>
+  </div>  `
+  }
+  const noteElems = this.container.querySelectorAll('.note');
+  noteElems.forEach((noteElem) => {
+    noteElem.addEventListener('click', (evt) => {
+      this.clickNote(evt)
+    })
+  })
 }
 
+}
 
 function addNote() {
   let n = NoteLounge.getAllNotes();
   let l = NoteLounge.saveNote({
     title: 'sixth post ',
-    body: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium cupiditate minima, libero commodi consectetur, voluptas voluptatum reiciendis maiores sint architecto repella ',
+    body: 'Lor!!em ipsum dolor sit amet, consectetur adipisicing elit. Accusantium cupiditate minima, libero commodi consectetur, voluptas voluptatum reiciendis maiores sint architecto repella ',
     category: 'test cat 7'
   })
   console.log(n);
@@ -117,38 +192,5 @@ function timeFormatter(timeInMs = new Date().getTime()) {
 }
 
 
-function renderNotesToView() {
-  const TF = timeFormatter;
-  const notes = NoteLounge.getAllNotes()
-  let html = '';
-  if (notes.length) {
-    notes.map((note) => {
-      html += `
-          <div class="note" data-note-id='${note.id}'>
-          <h2 class="note__title">${note.title}</h2>
-          <div class="note__body">
-          ${note.body}
-          </div>
-          <div class="note__category-pubdate">
-            <span class="note__category">
-            category: <span>${note.category}</span>
-            </span>
-            <span class="note__pubdate">
-            ${new Date(note.pubdate).toLocaleString(undefined,{dateStyle:'long',timeStyle:'medium'})}</span>
-          </div>
-</div>
-  `
-
-    });
-    notesContainer.innerHTML = html;
-  }
-  else {
-    notesContainer.innerHTML = `
-    <div class="no-notes-yet-container">
-      'no notes yet'
-      <button type="button" class="create-note-btn"> create a note </button>
-  </div>  `
-  }
-}
-renderNotesToView();
+// renderNotesToView();
 new  NotePasse('.notes-container')
