@@ -16,7 +16,6 @@
   <div class="wrapper">
     <div class="container">
           <div class="all-notes-container">
-        <button class="add-new-note-btn" id="add_new_note">add new</button>
         <div class="notes-container">
         </div>
       </div>
@@ -25,10 +24,14 @@
         <input type="text" class="new-note-title" id="new_note_title" />
         <!-- <input type="text" class="new-note-category" id="new_note_category" /> -->
       </div>
-      <textarea id="new_note_body" class="new-note-body"></textarea>
+      <div id="new_note_body" class="new-note-body" tabindex="0" contenteditable=""  > </div>
     </div>
   
       
+   </div>
+   <div class="bottom-nav">
+        <button class="add-new-note-btn" id="add_new_note"></button>
+     
    </div>
   </div>
     <!-- <script src="//unpkg.com/systemjs@0.19.47/dist/system.js"></script> -->

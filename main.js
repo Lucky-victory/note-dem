@@ -36,6 +36,8 @@ class NoteLounge {
     if(allNotes.length){
       
     return allNotes.sort((a, b) => b.pubdate - a.pubdate);
+    }else{
+      return allNotes;
     }
   }
   static deleteNote(id) {
@@ -51,7 +53,7 @@ class NoteLounge {
 }
 class NotePasse {
   constructor(container){
-    
+    this.addNote()
     this.container= document.querySelector(container);
     this.newNoteTitle = document.querySelector("#new_note_title");
     // this.newNoteCategory = document.querySelector("#new_note_category");
@@ -60,9 +62,9 @@ class NotePasse {
     this.noteId=null;
     this.renderNotesToView();
     
-  this.newNoteBody.addEventListener('blur',()=>{this.saveANote(this.noteToEdit)});  
+  // this.newNoteBody.addEventListener('blur',()=>{this.refreshNotes()});  
   [this.newNoteBody,this.newNoteTitle].forEach((newNoteVal)=>{
-  newNoteVal.addEventListener('keyup',()=>{
+  newNoteVal.addEventListener('blur',()=>{
     this.resaveNote()
   });
   })
@@ -71,33 +73,36 @@ class NotePasse {
 const clickedNote=evt.currentTarget;
 const allNotes=NoteLounge.getAllNotes();
 this.noteId = clickedNote.dataset.noteId
-const Note=NoteLounge.editNote(this.noteId)
-
-this.newNoteTitle.value=Note.title || '';
-this.newNoteBody.value=Note.body || '';
+const Note=NoteLounge.editNote(this.noteId);
+const noteElems = this.container.querySelectorAll('.note');
+noteElems.forEach((noteElem) => {
+  noteElem.classList.remove('active');
+})
+this.container.querySelector(`.note[data-note-id="${this.noteId}"]`).classList.add('active');
+this.newNoteTitle.value=Note.title ;
+this.newNoteBody.innerHTML=Note.body ;
 // this.newNoteCategory.value=Note.category || ''
 
 }
 resaveNote(){
   const U=this.Utils();
-  const body=U.isEmptyString(this.newNoteBody.value) ? '' : this.newNoteBody.value;
-  const title=U.isEmptyString(this.newNoteTitle.value) ? '' : this.newNoteTitle.value;
+  const body=this.newNoteBody.textContent
+  const title=this.newNoteTitle.value
   // const category=U.isEmptyString(this.newNoteCategory.value) ? '' : this.newNoteCategory.value;
-  
+  if(U.isEmptyString(title) && U.isEmptyString(body)) return;
   this.noteToEdit = {
     body,
     title,
     id: this.noteId
   }
+  NoteLounge.saveNote(this.noteToEdit);
+  
 }
 refreshNotes(){
-  NoteLounge.getAllNotes();
-}
-saveANote(note){
-  NoteLounge.saveNote(note);
   this.renderNotesToView()
   
 }
+
 Utils(){
   return {
     isUndefined(val){
@@ -147,22 +152,34 @@ const MAX_BODY_LENGTH=70;
   noteElems.forEach((noteElem) => {
     noteElem.addEventListener('click', (evt) => {
       this.clickNote(evt)
-    })
+    });
+    noteElem.addEventListener('dblclick', (evt) => {
+      this.deleteANote(evt);
+    });
   })
 }
-
+deleteANote(evt){
+  const noteId=evt.currentTarget.dataset.noteId;
+  const canDelete=confirm('you are about to delete a note');
+  if(canDelete){
+    
+  NoteLounge.deleteNote(noteId);
+  this.refreshNotes();
+  this.newNoteBody.textContent=''
+  this.newNoteTitle.value=''
+  }
 }
-
-function addNote() {
+addNote() {
   let n = NoteLounge.getAllNotes();
   let l = NoteLounge.saveNote({
     title: 'sixth post ',
-    body: 'Lor!!em ipsum dolor sit amet, consectetur adipisicing elit. Accusantium cupiditate minima, libero commodi consectetur, voluptas voluptatum reiciendis maiores sint architecto repella ',
-    category: 'test cat 7'
-  })
-  console.log(n);
+    body: 'Lor!!em ipsum dolor sit amet, consectetur adipisicing elit. Accusantium cupiditate minima, libero commodi consectetur, voluptas <input type="checkbox" /> voluptatum reiciendis maiores sint architecto repella ',
+    
+  });
+  
 }
-// addNote()
+}
+
 
 
 function timeFormatter(timeInMs = new Date().getTime()) {
@@ -193,4 +210,8 @@ function timeFormatter(timeInMs = new Date().getTime()) {
 
 
 // renderNotesToView();
-new  NotePasse('.notes-container')
+// new  NotePasse('.notes-container')
+
+
+// add updated time and created time
+
