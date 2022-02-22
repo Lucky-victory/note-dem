@@ -1,16 +1,9 @@
 import NoteAPI from './note-api';
 import generateID from './generate-id'
 import Notes from './notes';
-// const newNoteTitle = document.querySelector("#new_note_title");
-// const newNoteCategory = document.querySelector("#new_note_category");
-// const newNoteBody = document.querySelector("#new_note_body");
-// const notesContainer = document.querySelector(".notes-container");
-
-
-
+import { customAlert } from './custom-alert';
 class NotePasse {
   constructor(container){
-   //  this.addNote()
    const cont=Object.prototype.toString.call(container);
    this.container=null;
    if(typeof container == 'object' && cont.includes('HTML')){
@@ -24,35 +17,73 @@ else{
     // renders the html template for the note app.
     this.container.innerHTML=this._loadTemplate();
 
-   this.newNoteContainer = document.querySelector(".new-container");
-   this.notesContainer = document.querySelector(".all-notes-container");
+    // gets all notes from localStorage
+this.Notes=NoteAPI.getAllNotes();
+
+// checks if the user is searching
+this.isSearching=false;
+this.notesToDelete=[];
+// this.container.oncontextmenu=((evt)=> {evt.preventDefault(); return false})
+   this.newNoteContainer = this.container.querySelector(".new-container");
+   this.notesContainer = this.container.querySelector(".all-notes-container");
    
-   this.backBtn = document.querySelector(".back-home-btn");
-   this.addNewNoteBtn = document.querySelector("#add_new_note_btn");
+   this.backBtn = this.container.querySelector(".back-home-btn");
+   this.addNewNoteBtn = this.container.querySelector("#add_new_note_btn");
     this.addNewNoteBtn.addEventListener('click',()=>{
     this.showNewNoteFields()
     })
     this.backBtn.addEventListener('click',()=>{
     this.goHome()
     })
-   this.newNoteTitle = document.querySelector("#new_note_title");
-   
-   this.newNoteBody = document.querySelector("#new_note_body");
+   this.newNoteTitle = this.container.querySelector("#new_note_title");
+   this.searchBox=this.container.querySelector('.search-box');
+   this.newNoteBody = this.container.querySelector("#new_note_body");
+   this.deleteBtnWrapper=this.container.querySelector('.delete-btn-wrapper');
+   this.deleteBtn=this.container.querySelector('.delete-btn');
    this.noteToEdit = null;
    this.noteId = null;
-   
+
+   this.deleteBtn.addEventListener('click',()=>{
+     this.deleteNotes();
+   })
+   this.searchBox.addEventListener('keyup',(evt)=>{
+     this.searchNotes(evt)
+   })
    // renders the previous notes
    this.renderNotesToView();
    
+     [this.newNoteBody, this.newNoteTitle].forEach((newNoteVal) => {
+      newNoteVal.addEventListener('keyup', () => {
+   
+         this.resaveNote();
+   
+      });
+   });   
      [this.newNoteBody, this.newNoteTitle].forEach((newNoteVal) => {
       newNoteVal.addEventListener('blur', () => {
    
          this.resaveNote();
    
       });
-   })    
+   })   ;
    
 
+  }
+  searchNotes(evt){
+    this.isSearching=true;
+    const query=evt.target.value;
+    const U=this.Utils();
+    if(U.isEmptyString(query)){
+      this.Notes=NoteAPI.getAllNotes()
+      this.renderNotesToView();
+      return
+    }
+    const Notes=NoteAPI.getAllNotes();
+    const results=Notes.filter((note)=>{
+return (note.title.includes(query) || note.body.includes(query))
+    });
+    this.Notes=results;
+    this.renderNotesToView()
   }
   showNewNoteFields(){
      this.newNoteContainer.classList.add('view');
@@ -69,7 +100,14 @@ else{
      this.newNoteTitle.blur()
   }
   _loadTemplate(){
-     return (` <div class="all-notes-container"></div>
+     return (`
+     <div class='delete-btn-wrapper'>
+     <button type='button' class='delete-btn'>
+     <span class='material-icons-outlined'>delete</span>
+     </button>
+     </div>
+     <div class='search-box-wrapper'><input type='search' placeholder='Search Notes' class='search-box'/></div>
+     <div class="all-notes-container"></div>
      
      <div class='new-container'>
         <button type='button' class='back-home-btn'>
@@ -97,7 +135,6 @@ else{
   }
   clickNote(evt){
 const clickedNote=evt.currentTarget;
-const allNotes=NoteAPI.getAllNotes();
 this.noteId = clickedNote.dataset.noteId
 const Note=NoteAPI.getSingleNote(this.noteId);
 const noteElems = this.container.querySelectorAll('.note');
@@ -105,7 +142,7 @@ noteElems.forEach((noteElem) => {
   noteElem.classList.remove('active');
 })
 this.container.querySelector(`.note[data-note-id="${this.noteId}"]`).classList.add('active');
-// this.newNoteTitle.focus()
+this.newNoteTitle.focus()
 this.newNoteTitle.value=Note.title ;
 this.newNoteBody.value=Note.body ;
 this.newNoteContainer.classList.add('view')
@@ -137,17 +174,46 @@ Utils(){
     }
   }
 }
-renderNotesToView() {
-
-  Notes(this.notesContainer);
+selectToDelete(evt){
+  const target=evt.currentTarget;
+  target.classList.add('selected');
+  const {noteId}=target.dataset;
+  const note=NoteAPI.getSingleNote(noteId)
+  const isSelected=this.notesToDelete.find((note)=>note.id == noteId);
+if(target.classList.contains('selected') && !isSelected){
+this.notesToDelete.push(note);
+}
+else{
+  target.classList.remove('selected');
+  this.notesToDelete=this.notesToDelete.filter((note)=> note.id !== noteId);
+}
+if(this.notesToDelete.length >0){
+  this.deleteBtnWrapper.classList.add('show')
+}
+else this.deleteBtnWrapper.classList.remove('show');
+}
+renderNotesToView(notes=this.Notes) {
+const {notesContainer,isSearching}=this
+  Notes({notesContainer,notes,isSearching});
   const noteElems = this.container.querySelectorAll('.note');
+  const downEvents=['mousedown','touchstart'];
   noteElems.forEach((noteElem) => {
     noteElem.addEventListener('click', (evt) => {
-      this.clickNote(evt)
+      this.clickNote(evt);
+      evt.stopImmediatePropagation();
     });
-    noteElem.addEventListener('dblclick', (evt) => {
-      this.deleteANote(evt);
+    noteElem.addEventListener('contextmenu', (evt) => {
+      evt.preventDefault();
+      return false
     });
+    for(const type of downEvents){
+      noteElem.addEventListener(type, (evt) => {
+        this.selectToDelete(evt);
+        evt.stopImmediatePropagation()
+      })
+    }
+   
+    
   })
 }
 deleteANote(evt){
@@ -155,14 +221,26 @@ deleteANote(evt){
   const canDelete=confirm('Are you sure want to delete this Note?');
   if(canDelete){
     
-  NoteAPI.deleteNote(noteId);
-  this.refreshNotes();
-  this.resetInputFields()
+    NoteAPI.deleteNote(noteId);
+    this.refreshNotes();
+    this.resetInputFields()
   }
 }
+deleteNotes(){
+  const canDelete=customAlert('Are you sure you want to delete this notes?');
+  alert('hello')
+if(canDelete){
+
+  for(const note of this.notesToDelete){
+    NoteAPI.deleteNote(note.id);
+  }
+  this.notesToDelete=[];
+  this.renderNotesToView();
+  window.location.reload()
+}
+}
 addNote() {
-  let n = NoteAPI.getAllNotes();
-  let l = NoteAPI.addNote({
+   NoteAPI.addNote({
      id:this.noteId,
     title: '',
     body: ''});
@@ -183,10 +261,12 @@ discardEmptyNote(){
 
 }
 goHome(){
-this.discardEmptyNote()
-   this.renderNotesToView();
+this.discardEmptyNote();
+this.renderNotesToView();
+window.location.reload();
    this.resetInputFields();
-   this.hideNewNoteFields()
+   this.hideNewNoteFields();
+  
 }
 }
 
