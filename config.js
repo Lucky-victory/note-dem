@@ -3,18 +3,21 @@ SystemJS.config({
   defaultExtension: true,
   packages: {
     ".": {
-      main: './main.js',
+      main: './.js',
       defaultExtension: 'js'
     }
   },
   meta: {
     '*.js': {
-      'babelOptions': {}
+      'babelOptions': {
+         // react:false
+      }
     }
   },
   map: {
     'plugin-babel': 'systemjs-plugin-babel@latest/plugin-babel.js',
-    'systemjs-babel-build': 'systemjs-plugin-babel@latest/systemjs-babel-browser.js'
+    'systemjs-babel-build': 'systemjs-plugin-babel@latest/systemjs-babel-browser.js',
+    
   },
   transpiler: 'plugin-babel'
 });

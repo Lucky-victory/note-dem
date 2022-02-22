@@ -5,38 +5,22 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=Edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>HTML</title>
-  <!-- HTML -->
-  <!-- Custom Styles -->
+  <title>Note Lounge | Note taking App</title>
+    <script src="//unpkg.com/systemjs@0.19.47/dist/system.js"></script>
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined">
+
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
   <!-- Project -->
   <div class="wrapper">
-    <div class="container">
-          <div class="all-notes-container">
-        <div class="notes-container">
-        </div>
-      </div>
-    <div class="new-note-container">
-      <div class="form-group">
-        <input type="text" class="new-note-title" id="new_note_title" />
-        <!-- <input type="text" class="new-note-category" id="new_note_category" /> -->
-      </div>
-      <div id="new_note_body" class="new-note-body" tabindex="0" contenteditable=""  > </div>
-    </div>
-  
-      
-   </div>
-   <div class="bottom-nav">
-        <button class="add-new-note-btn" id="add_new_note"></button>
+  <div id="root" class="container">
      
    </div>
-  </div>
-    <!-- <script src="//unpkg.com/systemjs@0.19.47/dist/system.js"></script> -->
-
-  <script src="./main.js"></script>
+     
+   </div>
+  <script src="./config.js"></script>
 </body>
 
 </html>
