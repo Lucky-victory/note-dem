@@ -228,7 +228,9 @@ deleteANote(evt){
 }
 deleteNotes(){
   const canDelete=customAlert('Are you sure you want to delete this notes?');
-  alert('hello')
+
+console.log(canDelete)
+  return
 if(canDelete){
 
   for(const note of this.notesToDelete){

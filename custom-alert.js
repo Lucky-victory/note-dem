@@ -56,7 +56,6 @@ document.body.appendChild(customAlertWrapper);
 confirmBtn.onclick=()=>{
     can=true;
     document.body.removeChild(customAlertWrapper);
-    
 }
 cancelBtn.onclick=()=>{
     can=false
