@@ -1,2 +1,2 @@
-# notes-lounge
-Note keeping web app.
+# notes-dem
+A note keeping web app. that supports markdown
