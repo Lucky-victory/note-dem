@@ -16,7 +16,9 @@ html=(`<div class="notes-container">
           ${note.body.substring(0,MAX_BODY_LENGTH)}
           ${note.body.length > MAX_BODY_LENGTH ? '...' : ''}
           </div>
-         
+            <div class="note__category-pubdate">
+               <span class="pubdate">${new Date(note.pubdate).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"})}</span>
+            </div>
          </div>`
     }).join('')
          } </div>`)
