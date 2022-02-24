@@ -1,7 +1,7 @@
 
 export default function Notes({notesContainer,notes,isSearching=false}){
    
-   const MAX_BODY_LENGTH=150;
+   const MAX_BODY_LENGTH=100;
    const MAX_TITLE_LENGTH=40;
   let html = '';
   if (notes.length) {
