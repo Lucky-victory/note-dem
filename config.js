@@ -17,7 +17,8 @@ SystemJS.config({
   map: {
     'plugin-babel': 'systemjs-plugin-babel@latest/plugin-babel.js',
     'systemjs-babel-build': 'systemjs-plugin-babel@latest/systemjs-babel-browser.js',
-    'showdown':'showdown/dist/showdown.min.js'
+    'showdown':'showdown/dist/showdown.min.js',
+    'html-ent':"html-entities@2.3.2/lib/index.js"
   },
   transpiler: 'plugin-babel'
 });

@@ -49,7 +49,10 @@ class NoteDem {
       this.noteToEdit = null;
       this.noteId = null;
       this.mobileScreen = matchMedia('(max-width:724px)');
-      // event listeners
+      
+      // **EVENT LISTENERS**
+      
+      // checks for screen resolution changes.
       this.mobileScreen.addEventListener('change', (evt) => {
          if (evt.matches && this.previewCheckbox.checked) {
             this.newNoteFormContainer.classList.add('show-preview');
@@ -88,14 +91,6 @@ class NoteDem {
             this.renderPreview();
          });
       });
-     [this.newNoteBody, this.newNoteTitle].forEach((newNoteVal) => {
-         newNoteVal.addEventListener('blur', () => {
-
-            this.resaveNote();
-
-         });
-      });
-
 
    }
    searchNotes(evt) {
